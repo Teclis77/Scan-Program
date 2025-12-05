@@ -1,0 +1,265 @@
+record(ai, $(user):status) {
+	field(DESC, "for test")
+	field(VAL, "0")
+	field(PINI, "YES")
+}
+#record(ao, $(user):start) {
+#	field(DESC, "Start point scanning")
+#	field(PREC, "3")
+#}
+#record(ao, $(user):end) {
+#        field(DESC, "End point scanning")
+#	field(PREC, "3")
+#}
+#record(ao, $(user):step) {
+#        field(DESC, "Step scanning")
+#	field(PREC, "3")
+#}
+#####
+#       Scan Parameters
+#####
+record(ao, $(user):num_motor) {
+	field(DESC, "Number of Motors")
+	field(VAL, "$(mm)")
+	field(PINI, "YES")
+}
+record(ao, $(user):num_detector) {
+        field(DESC, "Number of Detectors")
+        field(VAL, "$(dd)")
+        field(PINI, "YES")
+}
+record(waveform, $(user):start) {
+        field(DESC, "Start point scanning")
+	field(NELM, "$(mm)")
+        field(FTVL, "SHORT")
+        field(PREC, "3")
+}
+record(waveform, $(user):end) {
+        field(DESC, "End point scanning")
+	field(NELM, "$(mm)")
+        field(FTVL, "SHORT")
+        field(PREC, "3")
+}
+record(waveform, $(user):step) {
+        field(DESC, "Step scanning")
+	field(NELM, "$(mm)")
+        field(FTVL, "SHORT")
+        field(PREC, "3")
+}
+#####
+#	Definition Motor
+#####
+#
+#record(stringout, $(user):motor_name) {
+#	field(DESC, "Name IOC motor")
+#}
+#record(waveform, $(user):motor_name) {
+record(waveform, $(user):motor) {
+        field(DESC, "Name IOC motors")
+	field(NELM, "$(mm)")
+        field(FTVL, "STRING")
+}
+
+
+
+
+
+#record(stringout, $(user):motor_card) {
+#	field(DESC, "Num card motor")
+#}
+#record(stringout, $(user):motor_device) {
+#        field(DESC, "Num device motor")
+#}
+#record(bo, $(user):create_label_motor) {
+#	field(DESC, "Generate motor label")
+#	field(FLNK, "$(user):motor_def")
+#}
+#record(scalcout, $(user):motor_def) {
+#	field(DESC, "Create motor label")
+#	field(INAA, "$(user):motor_name")
+#	field(INBB, "$(user):motor_card")
+#	field(INCC, "$(user):motor_device")
+#	field(INDD, "$(user):command")
+#	field(CALC, "AA+':'+DD+'_'+BB+'_'+CC")
+#	field(OCAL, "SVAL")
+#	field(OUT, "$(user):motor")
+#	field(FLNK, "$(user):motor")
+#} 
+#record(stringout, $(user):motor) {
+#    field(DESC, "Motor Selected")
+#}
+#
+#	List Motor Commands
+#
+record(stringout, $(user):mr) {
+        field(DESC, "Command Move Relative")
+	field(VAL, "setmr")
+	field(PINI, "YES")
+}
+record(stringout, $(user):ma) {
+        field(DESC, "Command Move Absolute")
+        field(VAL, "setma")
+        field(PINI, "YES")
+}
+record(stringout, $(user):ismov) {
+        field(DESC, "Command Is Moving?")
+        field(VAL, "reqmoving")
+        field(PINI, "YES")
+}
+record(stringout, $(user):move) {
+        field(DESC, "Command Is Moving?")
+        field(VAL, "moving")
+        field(PINI, "YES")
+}
+record(stringout, $(user):reqposition) {
+        field(DESC, "Request Position")
+        field(VAL, "reqpos")
+        field(PINI, "YES")
+}
+record(stringout, $(user):position) {
+        field(DESC, "Request Position")
+        field(VAL, "pos")
+        field(PINI, "YES")
+}
+
+
+
+record(waveform, $(user):command) {
+        field(DESC, "List Command")
+        field(NELM, "6")
+        field(FTVL, "STRING")
+	field(INP, [setmr,setma,reqmoving,moving,reqpos,pos])
+}
+
+##record(stringout, $(user):create_command_label) {
+#record(ao, $(user):create_command_label) {
+#	field(DESC, "Generate Command")
+#	field(FLNK, "$(user):command_def")
+#}
+#record(scalcout, $(user):command_def) {
+#	field(DESC, "Create Command Label")
+##        field(INAA, "$(user):create_command_label")
+#        field(INPA, "$(user):create_command_label")
+#        field(INBB, "$(user):mr")
+#        field(INCC, "$(user):ma")
+#        field(INDD, "$(user):ismov")
+#        field(INEE, "$(user):position")
+#        field(INFF, "$(user):move")
+#        field(INGG, "$(user):reqposition")
+##	field(CALC, "A=1?BB:(A=2?CC:(A=3?DD:EE))")
+#	field(CALC, "A=1?BB:(A=2?CC:(A=3?DD:(A=4?EE:(A=5?FF:GG))))")
+#        field(OCAL, "SVAL")
+#        field(OUT, "$(user):command")
+#        field(FLNK, "$(user):command")
+#}
+#record(stringout, $(user):command) {
+#	field(DESC, "Command Seleted")
+#	field(FLNK, "$(user):motor_def")
+#}
+#
+#
+#
+#record(scalcout, $(user):motor_def) {
+#        field(DESC, "Create motor label")
+#        field(INAA, "$(user):motor_name")
+##        field(INBB, "$(user):motor_card")
+##        field(INCC, "$(user):motor_device")
+##        field(INDD, "$(user):command")
+#        field(INBB, "$(user):command")
+##        field(CALC, "AA+':'+DD+'_'+BB+'_'+CC")
+##        field(CALC, "AA+'_'+BB+'_'+CC+':'+DD")
+#        field(CALC, "AA+':'+BB")
+#        field(OCAL, "SVAL")
+#        field(OUT, "$(user):motor")
+#        field(FLNK, "$(user):motor")
+#}
+#record(stringout, $(user):motor) {
+#    field(DESC, "Motor Selected")
+#}
+record(waveform, $(user):test) {
+	field(DESC, "test array")
+	field(NELM, "2")
+	field(FTVL, "STRING")
+	field(INP, [pippo1,pluto3])
+	field(PINI, "YES")
+}
+
+#################
+#
+#	Definition Detector
+#
+record(stringout, $(user):detector_name) {
+        field(DESC, "Name IOC motor")
+}
+#
+#	List Detector Commands
+#
+record(stringout, $(user):acquisition) {
+        field(DESC, "Detector Start Acquisition")
+        field(VAL, "reqacq")
+        field(PINI, "YES")
+}
+record(stringout, $(user):isready) {
+        field(DESC, "Detector is Ready")
+        field(VAL, "isready")
+        field(PINI, "YES")
+}
+#record(stringout, $(user):create_command_detector_label) {
+record(ao, $(user):create_command_detector_label) {
+        field(DESC, "Generate Detector Command")
+        field(FLNK, "$(user):command_det_def")
+}
+record(scalcout, $(user):command_det_def) {
+        field(DESC, "Create Command Detector Label")
+#        field(INAA, "$(user):create_command_detector_label")
+        field(INPA, "$(user):create_command_detector_label")
+        field(INBB, "$(user):acquisition")
+        field(INCC, "$(user):isready")
+#        field(INDD, "$(user):ismov")
+#        field(INEE, "$(user):position")
+#        field(CALC, "AA=1?BB:(AA=2?CC:(AA=3?DD:EE))")
+        field(CALC, "A=1?BB:CC")
+        field(OCAL, "SVAL")
+        field(OUT, "$(user):command_detector")
+        field(FLNK, "$(user):command_detector")
+}
+record(stringout, $(user):command_detector) {
+        field(DESC, "Command Detector Seleted")
+        field(FLNK, "$(user):detector_def")
+}
+#
+#
+#
+record(scalcout, $(user):detector_def) {
+        field(DESC, "Create Detector Label")
+        field(INAA, "$(user):detector_name")
+        field(INBB, "$(user):command_detector")
+#        field(CALC, "AA+':starting'")
+        field(CALC, "AA+':'+BB")
+        field(OCAL, "SVAL")
+        field(OUT, "$(user):detector")
+        field(FLNK, "$(user):detector")
+}
+record(stringout, $(user):detector) {
+        field(DESC, "Detector Seleted")
+}
+#
+#
+#	Read Terminators
+#
+#record(stringout, $(user):$(ioc)_term) {
+#	field(DESC, "Reading the done terminator")
+#	field(VAL, "$(ready)")
+#}
+#record(waveform, $(user):ioc) {
+#	field(DESC, "IOC loaded")
+#	field(NELM, "200")
+#	field(FTVL, "STRING")
+#	field(PINI, "YES")
+#}
+#record(waveform, $(user):ready) {
+#        field(DESC, "Terminators loaded")
+#        field(NELM, "200")
+#        field(FTVL, "STRING")
+#        field(PINI, "YES")
+#}

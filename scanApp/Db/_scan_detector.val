@@ -1,0 +1,5 @@
+file db/scan.db {
+	pattern {ioc, ready}
+		{ortec_1, 1}
+		{photsci_1, 1}
+}

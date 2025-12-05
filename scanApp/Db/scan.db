@@ -1,0 +1,82 @@
+#################################################
+# ###                                       ### #
+# ### Epics database for	            ### #
+# ### SCAN System	                    ### #
+# ###                                       ### #
+# ### author: D. Hampai - M. Montis         ### #
+# ###                                       ### #
+# ### Ref 1.0; 2025-12-04                   ### #
+#################################################
+#
+#
+record(ai, $(user):status) {
+	field(DESC, "for test")
+	field(VAL, "0")
+	field(PINI, "YES")
+}
+record(stringin, $(user):state) {
+	field(DESC, "Actual State")
+	field(VAL, "Idle")
+	field(PINI, "YES")
+}
+#####
+#       Scan Parameters
+#####
+record(ao, $(user):num_motor) {
+	field(DESC, "Number of Motors")
+	field(VAL, "$(mm)")
+	field(PINI, "YES")
+}
+record(ao, $(user):num_detector) {
+        field(DESC, "Number of Detectors")
+        field(VAL, "$(dd)")
+        field(PINI, "YES")
+}
+record(waveform, $(user):start) {
+        field(DESC, "Start point scanning")
+	field(NELM, "$(mm)")
+        field(FTVL, "SHORT")
+        field(PREC, "3")
+}
+record(waveform, $(user):end) {
+        field(DESC, "End point scanning")
+	field(NELM, "$(mm)")
+        field(FTVL, "SHORT")
+        field(PREC, "3")
+}
+record(waveform, $(user):step) {
+        field(DESC, "Step scanning")
+	field(NELM, "$(mm)")
+        field(FTVL, "SHORT")
+        field(PREC, "3")
+}
+#####
+#	Definition Motor
+#####
+record(waveform, $(user):motor) {
+        field(DESC, "Name IOC motors")
+	field(NELM, "$(mm)")
+        field(FTVL, "STRING")
+}
+#	List Motor Commands
+record(waveform, $(user):motor_command) {
+        field(DESC, "List Motor Command")
+        field(NELM, "6")
+        field(FTVL, "STRING")
+	field(INP, [setmr,setma,reqmoving,moving,reqpos,pos])
+}
+#####
+#	Definition Detector
+#####
+record(waveform, $(user):detector) {
+        field(DESC, "Name IOC detectors")
+        field(NELM, "$(dd)")
+        field(FTVL, "STRING")
+}
+#	List Detector Commands
+record(waveform, $(user):detector_command) {
+        field(DESC, "List Detector Command")
+        field(NELM, "3")
+        field(FTVL, "STRING")
+        field(INP, [reqacq,isready,read])
+}

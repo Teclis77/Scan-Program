@@ -1,0 +1,68 @@
+program sncscan
+
+    option +r;	 /* Make the generated code reentrant, thus allowing more than one instance 
+						of the program to run on an IOC */
+double test;
+assign test to "{user}:status";
+monitor test;
+
+string motor;
+assign motor to "$(user):motor";
+monitor motor;
+
+string motor_selected;
+assign motor_selected to "";
+
+string command;
+assign command to "$(user):create_command_label";
+monitor command;
+
+string command_selected;
+assign command_selected to "";
+
+string detector;
+assign detector to "$(user):detector";
+monitor detector;
+
+string pvMotor;
+string pvCommand;
+string pvDetector;
+
+ss scan_test {
+     state init {
+	when (test==0) {
+		printf("test off\n");
+	} state pause
+     }
+     state pause {
+	when (test==1) {
+		printf("reset\n");
+		test=0;
+		pvPut(test);
+	} state read_code
+     } 
+     state read_code {
+	when (delay(5)) {
+		//pvGet(motor);
+		sprintf (pvMotor, "%s", motor);
+		pvAssign(motor_selected, pvMotor);
+		printf("\n Motor Selected: %s\n\n", motor_selected);
+	} state wait_connection
+     }
+     state wait_connection {
+	when (pvConnected(motor_selected)) {
+		pvGet(motor_selected);
+	printf("Motor value: %s\n", motor_selected);
+	} state read_code
+	when (delay(10)) {
+            printf("Connection timeout!\n");
+        } state read_code
+     }
+}
+
+
+/*
+SPDX-FileCopyrightText: 1998 Argonne National Laboratory
+
+SPDX-License-Identifier: EPICS
+*/

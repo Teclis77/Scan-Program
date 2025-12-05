@@ -1,0 +1,248 @@
+//#################################################
+//# ###                                       ### #
+//# ### Epics SNL Routines for		      ### #
+//# ### Scan System	                      ### #
+//# ###                                       ### #
+//# ### author: D. Hampai - M. Montis         ### #
+//# ###                                       ### #
+//# ### Ref 1.0; 2025-12-04                   ### #
+//#################################################
+//#
+//
+program sncscan
+
+/*=================== Declarations =========================*/
+
+option +r;       /* Make the generated code reentrant, thus allowing more than one instance of the program to run on an IOC */
+double status_mode;
+assign status_mode to "{user}:status";
+monitor status_mode;
+string actual_status;
+assign actual_status to "{user}:state";
+monitor actual_status;
+//
+// Definition Parameters
+//
+int num_mot;
+assign num_mot to "{user}:num_motor";
+monitor num_mot;
+int num_det;
+assign num_det to "{user}:num_detector";
+monitor num_det;
+
+double start[10];
+assign start to "{user}:start";
+monitor start;
+double stop[10];
+assign stop to "{user}:end";
+monitor stop;
+double step[10];
+assign step to "{user}:step";
+monitor step;
+//
+// Definition Motors Variables
+//
+string motor[10];
+assign motor to "{user}:motor";
+monitor motor;
+
+string mot_command[6];
+assign mot_command to "{user}:motor_command";
+monitor mot_command;
+//
+// Definition Detectors Variables
+//
+string detector[10];
+assign detector to "{user}:detector";
+monitor detector;
+
+string det_command[3];
+assign det_command to "{user}:detector_command";
+monitor det_command;
+
+// Local Strings
+double motget;
+assign motget to "";
+monitor motget;
+double motset;
+assign motset to "";
+monitor motset;
+
+double detget;
+assign detget to "";
+monitor detget;
+double detset;
+assign detset to "";
+monitor detset;
+
+double pos;
+double mov_wait;
+double acq_wait;
+//
+//	Local Variables
+//
+double motor_mr[10];
+assign motor_mr to {};
+monitor motor_mr;
+double motor_ma[10];
+assign motor_ma to {};
+monitor motor_ma;
+int motor_reqmov[10];
+assign motor_reqmov to {};
+monitor motor_reqmov;
+int motor_mov[10];
+assign motor_mov to {};
+monitor motor_mov;
+int motor_reqpos[10];
+assign motor_reqpos to {};
+monitor motor_reqpos;
+double motor_pos[10];
+assign motor_pos to {};
+monitor motor_pos;
+//
+string detector_reqacq[10];
+assign detector_reqacq to {};
+monitor detector_reqacq;
+string detector_isready[10];
+assign detector_isready to {};
+monitor detector_isready;
+string detector_read[10];
+assign detector_read to {};
+monitor detector_read;
+//
+int i;
+int j;
+int k;
+int command;
+char temp_string[80];
+//
+//
+//
+//
+ss scan_status_mode {
+/*=================== Start Program =========================*/
+        state init {
+                when (status_mode==0) {
+                        printf("\n **********************\n");
+                        printf("\n *** Ready for Scan ***\n");
+                        printf("\n **********************\n");
+			strcpy(actual_status, "Starting Scan Program");
+			pvPut(actual_status,SYNC);
+			} state idle
+        }
+        state idle {
+/*=================== Assign Motor Varibles =========================*/
+		when (status_mode==1) {
+			printf("num_mot = %d\n", num_mot);
+			for (i = 0; i < num_mot; i++) { 
+				printf("index = %d\n", i);
+//
+				command=0; 
+				sprintf(temp_string, "%s:%s", motor[i], mot_command[command]); 
+				printf("%s\n", temp_string);
+				pvAssign(motor_mr[i],temp_string); 
+//
+                                command=1;
+                                sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(motor_ma[i],temp_string);
+//
+                                command=2;
+                                sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(motor_reqmov[i],temp_string);
+//
+                                command=3;
+                                sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(motor_mov[i],temp_string);
+//
+                                command=4;
+                                sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(motor_reqpos[i],temp_string);
+//
+                                command=5;
+                                sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(motor_pos[i],temp_string);
+			}
+                        strcpy(actual_status, "Motors Parameters Assigned");
+                        pvPut(actual_status,SYNC);
+			status_mode=0;
+			pvPut(status_mode);
+		} state idle
+//
+/*=================== Assign Detector Varibles =========================*/
+                when (status_mode==2) {
+                        printf("num_det = %d\n", num_det);
+                        for (i = 0; i < num_det; i++) {
+                                printf("index = %d\n", i);
+//
+                                command=0;
+                                sprintf(temp_string, "%s:%s", detector[i], det_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(detector_reqacq[i],temp_string);
+//
+                                command=1;
+                                sprintf(temp_string, "%s:%s", detector[i], det_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(detector_isready[i],temp_string);
+//
+                                command=2;
+                                sprintf(temp_string, "%s:%s", detector[i], det_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(detector_read[i],temp_string);
+                        }
+                        strcpy(actual_status, "Detectors Parameters Assigned");
+                        pvPut(actual_status,SYNC);
+                        status_mode=0;
+                        pvPut(status_mode);
+                } state idle
+/*=================== Preparing Scan =========================*/
+		when (status_mode==3) {
+			printf("\n **************************\n");
+			printf("\n *** Preparing for Scan ***\n");
+			printf("\n **************************\n");			
+			for (i = 0; i < num_mot; i++) {
+				printf("motor to move = %d\n", i);
+				motor_ma[i]=start[i];
+				pvPut(motor_ma[i],SYNC);
+				motor_reqmov[i]=1;
+				printf("request moving = %d\n", motor_reqmov[i]);
+                                pvPut(motor_reqmov[i],SYNC);
+                                pvGet(motor_mov[i],SYNC);
+				printf("status moving = %d\n", motor_mov[i]);
+				while(motor_mov[i]<1) {
+					motor_reqmov[i]=1;
+					printf("request moving = %d\n", motor_reqmov[i]);
+					pvPut(motor_reqmov[i],SYNC);
+					pvGet(motor_mov[i],SYNC);
+					printf("status moving = %d\n", motor_mov[i]);
+				}
+				pvGet(motor_pos[i], SYNC);
+				printf("Position = %f\n", motor_pos[i]);
+				motor_ma[i]=start[i];
+			}
+                        strcpy(actual_status, "Ready to Start");
+                        pvPut(actual_status,SYNC);
+                        status_mode=0;
+                        pvPut(status_mode);
+		} state idle
+
+
+
+	}
+		
+
+
+
+
+
+}
+
+/*
+SPDX-FileCopyrightText: 1998 Argonne National Laboratory
+
+SPDX-License-Identifier: EPICS
+*/

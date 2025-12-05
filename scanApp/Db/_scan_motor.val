@@ -1,0 +1,6 @@
+file db/scan.db {
+	pattern {ioc, ready}
+		{mm4006_1, @}
+		{pi_1, 0}
+		{pi_2, 1}
+}

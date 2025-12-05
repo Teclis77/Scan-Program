@@ -1,0 +1,4 @@
+file db/scan.db {
+	pattern {mm, dd}
+		{"2", "1"}
+}
