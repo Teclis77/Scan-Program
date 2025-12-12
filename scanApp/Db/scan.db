@@ -19,44 +19,78 @@ record(stringin, $(user):state) {
 	field(VAL, "Idle")
 	field(PINI, "YES")
 }
+record(stringin, $(user):experiment) {
+	field(DESC, "Name Experiment")
+	field(VAL, "$(user)")
+	field(PINI, "YES")
+}
 #####
 #       Scan Parameters
 #####
 record(ao, $(user):num_motor) {
 	field(DESC, "Number of Motors")
-	field(VAL, "$(mm)")
+	field(VAL, "1")
 	field(PINI, "YES")
+	field(OUT, "$(user):motorindex")
+	field(FLNK, "$(user):motorindex")
+}
+record(dfanout, $(user):motorindex) {
+	field(SELM, "0")
+	field(SELL, "$(user):num_motor")
+	field(OUTA, "$(user):start.NELM")
+	field(OUTB, "$(user):end.NELM")
+	field(OUTC, "$(user):step.NELM")
+	field(OUTD, "$(user):motor.NELM")
 }
 record(ao, $(user):num_detector) {
         field(DESC, "Number of Detectors")
-        field(VAL, "$(dd)")
+        field(VAL, "1")
         field(PINI, "YES")
+        field(OUT, "$(user):detectorindex")
+        field(FLNK, "$(user):detectorindex")
 }
-record(waveform, $(user):start) {
+record(dfanout, $(user):detectorindex) {
+        field(SELM, "0")
+        field(SELL, "$(user):num_detector")
+        field(OUTA, "$(user):detector.NELM")
+}
+#
+#
+#
+record(subArray, $(user):start) {
         field(DESC, "Start point scanning")
-	field(NELM, "$(mm)")
+	field(NELM, "20")
+	field(MALM, "20")
+	field(INDX, "0")
         field(FTVL, "SHORT")
         field(PREC, "3")
 }
-record(waveform, $(user):end) {
+record(subArray, $(user):end) {
         field(DESC, "End point scanning")
-	field(NELM, "$(mm)")
+        field(NELM, "20")
+        field(MALM, "20")
+        field(INDX, "0")
         field(FTVL, "SHORT")
         field(PREC, "3")
 }
-record(waveform, $(user):step) {
+record(subArray, $(user):step) {
         field(DESC, "Step scanning")
-	field(NELM, "$(mm)")
+        field(NELM, "20")
+        field(MALM, "20")
+        field(INDX, "0")
         field(FTVL, "SHORT")
         field(PREC, "3")
 }
 #####
 #	Definition Motor
 #####
-record(waveform, $(user):motor) {
+record(subArray, $(user):motor) {
         field(DESC, "Name IOC motors")
-	field(NELM, "$(mm)")
+        field(NELM, "20")
+        field(MALM, "20")
+        field(INDX, "0")
         field(FTVL, "STRING")
+        field(PREC, "3")
 }
 #	List Motor Commands
 record(waveform, $(user):motor_command) {
@@ -68,15 +102,17 @@ record(waveform, $(user):motor_command) {
 #####
 #	Definition Detector
 #####
-record(waveform, $(user):detector) {
-        field(DESC, "Name IOC detectors")
-        field(NELM, "$(dd)")
+record(subArray, $(user):detector) {
+        field(NELM, "20")
+        field(MALM, "20")
+        field(INDX, "0")
         field(FTVL, "STRING")
+        field(PREC, "3")
 }
 #	List Detector Commands
 record(waveform, $(user):detector_command) {
         field(DESC, "List Detector Command")
-        field(NELM, "3")
+        field(NELM, "5")
         field(FTVL, "STRING")
-        field(INP, [reqacq,isready,read])
+        field(INP, [reqstart,reqdata,data,reqready,ready])
 }

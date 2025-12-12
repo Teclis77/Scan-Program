@@ -6,4 +6,7 @@
 # inside the source file, not from its filename. Here the
 # program is called sncExample, but is compiled in both the
 # sncExample.stt and sncProgram.st source files.
-registrar(sncscanRegistrar)
+#registrar(sncscanRegistrar)
+registrar(xena_sncscanRegistrar)
+registrar(rxr_sncscanRegistrar)
+registrar(cts_sncscanRegistrar)

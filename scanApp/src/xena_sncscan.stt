@@ -9,11 +9,18 @@
 //#################################################
 //#
 //
-program sncscan
+program xena_sncscan
 
 /*=================== Declarations =========================*/
 
 option +r;       /* Make the generated code reentrant, thus allowing more than one instance of the program to run on an IOC */
+//
+string name_exp_pv;
+assign name_exp_pv to "{user}:experiment";
+monitor name_exp_pv;
+//
+string name_exp[40];
+//
 double status_mode;
 assign status_mode to "{user}:status";
 monitor status_mode;
@@ -33,9 +40,9 @@ monitor num_det;
 double start[20];
 assign start to "{user}:start";
 monitor start;
-double stop[20];
-assign stop to "{user}:end";
-monitor stop;
+double end[20];
+assign end to "{user}:end";
+monitor end;
 double step[20];
 assign step to "{user}:step";
 monitor step;
@@ -100,21 +107,28 @@ double motor_pos[20];
 assign motor_pos to {};
 monitor motor_pos;
 //
-string detector_reqacq[10];
-assign detector_reqacq to {};
-monitor detector_reqacq;
-string detector_isready[10];
-assign detector_isready to {};
-monitor detector_isready;
-string detector_read[10];
-assign detector_read to {};
-monitor detector_read;
+int detector_reqstart[20];
+assign detector_reqstart to {};
+monitor detector_reqstart;
+int detector_reqready[20];
+assign detector_reqready to {};
+monitor detector_reqready;
+int detector_ready[20];
+assign detector_ready to {};
+monitor detector_ready;
+int detector_reqdata[20];
+assign detector_reqdata to {};
+monitor detector_reqdata;
+double detector_data[20];
+assign detector_data to {};
+monitor detector_data;
 //
 int i;
 int j;
 int k;
 int command;
 char temp_string[80];
+double posit[20];
 //
 //
 //
@@ -123,16 +137,51 @@ ss scan_status_mode {
 /*=================== Start Program =========================*/
         state init {
                 when (status_mode==0) {
+			pvGet(name_exp_pv,SYNC);
+			printf("the experiment is %s\n", name_exp_pv);
+//			pvAssign(name_exp,name_exp_pv);
+//			printf("the experiment is %s\n", name_exp);
+//
                         printf("\n **********************\n");
                         printf("\n *** Ready for Scan ***\n");
+                        printf("\n ***    Exp Xena    ***\n");
                         printf("\n **********************\n");
 			strcpy(actual_status, "Starting Scan Program");
 			pvPut(actual_status,SYNC);
 			} state idle
         }
-        state idle {
-/*=================== Assign Motor Varibles =========================*/
+	state idle {
 		when (status_mode==1) {
+                        printf("\n ********************\n");
+                        printf("\n *** Assign Motor ***\n");
+                        printf("\n ********************\n");
+		} state assign_motor
+		when (status_mode==2) {
+                        printf("\n ***********************\n");
+                        printf("\n *** Assign Detector ***\n");
+                        printf("\n ***********************\n");
+		} state assign_detector
+		when (status_mode==3) {
+                        printf("\n ********************\n");
+                        printf("\n *** Prepare Loop ***\n");
+                        printf("\n ********************\n");
+		} state prepare_loop
+                when (status_mode==4) {
+                        printf("\n ******************\n");
+                        printf("\n *** Inner Loop ***\n");
+                        printf("\n ******************\n");
+                } state inner_loop
+                when (status_mode==5) {
+                        printf("\n ******************\n");
+                        printf("\n *** Dummy Loop ***\n");
+                        printf("\n ******************\n");
+                } state dummy_loop
+	}
+//        state idle {
+/*=================== Assign Motor Varibles =========================*/
+        state assign_motor {
+//		when (status_mode==1) {
+		when () {
 			printf("num_mot = %d\n", num_mot);
 			for (i = 0; i < num_mot; i++) { 
 				printf("index = %d\n", i);
@@ -172,9 +221,14 @@ ss scan_status_mode {
 			status_mode=0;
 			pvPut(status_mode);
 		} state idle
-//
+	}
 /*=================== Assign Detector Varibles =========================*/
-                when (status_mode==2) {
+
+// detector_reqstart detector_reqready detector_ready detector_reqdata detector_data
+
+        state assign_detector {
+//                when (status_mode==2) {
+                when () {
                         printf("num_det = %d\n", num_det);
                         for (i = 0; i < num_det; i++) {
                                 printf("index = %d\n", i);
@@ -182,25 +236,38 @@ ss scan_status_mode {
                                 command=0;
                                 sprintf(temp_string, "%s:%s", detector[i], det_command[command]);
                                 printf("%s\n", temp_string);
-                                pvAssign(detector_reqacq[i],temp_string);
+                                pvAssign(detector_reqstart[i],temp_string);
 //
                                 command=1;
                                 sprintf(temp_string, "%s:%s", detector[i], det_command[command]);
                                 printf("%s\n", temp_string);
-                                pvAssign(detector_isready[i],temp_string);
+                                pvAssign(detector_reqdata[i],temp_string);
 //
                                 command=2;
                                 sprintf(temp_string, "%s:%s", detector[i], det_command[command]);
                                 printf("%s\n", temp_string);
-                                pvAssign(detector_read[i],temp_string);
+                                pvAssign(detector_data[i],temp_string);
+//
+                                command=3;
+                                sprintf(temp_string, "%s:%s", detector[i], det_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(detector_reqready[i],temp_string);
+//
+                                command=4;
+                                sprintf(temp_string, "%s:%s", detector[i], det_command[command]);
+                                printf("%s\n", temp_string);
+                                pvAssign(detector_ready[i],temp_string);
                         }
                         strcpy(actual_status, "Detectors Parameters Assigned");
                         pvPut(actual_status,SYNC);
                         status_mode=0;
                         pvPut(status_mode);
                 } state idle
+	}
 /*=================== Preparing Scan =========================*/
-		when (status_mode==3) {
+        state prepare_loop {
+//		when (status_mode==3) {
+		when () {
 			printf("\n **************************\n");
 			printf("\n *** Preparing for Scan ***\n");
 			printf("\n **************************\n");			
@@ -222,22 +289,76 @@ ss scan_status_mode {
 				}
 				pvGet(motor_pos[i], SYNC);
 				printf("Position = %f\n", motor_pos[i]);
-				motor_ma[i]=start[i];
+//				motor_ma[i]=start[i];
 			}
                         strcpy(actual_status, "Ready to Start");
                         pvPut(actual_status,SYNC);
                         status_mode=0;
                         pvPut(status_mode);
 		} state idle
-
-
-
 	}
-		
+/*=================== Inner Loop =========================*/
+        state inner_loop {
+//		when (status_mode==4) {
+		when () {
+			for (i=0; i < num_mot; i++) {
+				posit[i]=start[i];
+			}
+//
+                        printf("\n *************************\n");
+                        printf("\n ***** Starting Scan *****\n");
+                        printf("\n *************************\n");
+                        strcpy(actual_status, "Starting Scan... %s is busy!!!");
+                        pvPut(actual_status,SYNC);
+//
+			while (posit[num_det-1]>end[num_det-1]) {																
+				for (j=0; j < num_det; j++) {
+					detector_reqstart[j]=1;
+					pvPut(detector_reqstart[j],SYNC);
+					printf("Starting Acquisition");
+					detector_reqready[j]=1;
+					pvPut(detector_reqready[j],SYNC);
+					pvGet(detector_ready[j],SYNC);
+					while(detector_ready[j]<1) {
+						detector_reqready[j]=1;
+						pvPut(detector_reqready[j],SYNC);
+						pvGet(detector_ready[j],SYNC);
+					}
+					detector_reqdata[j]=1;
+					pvPut(detector_reqdata[j],SYNC);
+					pvGet(detector_data[j],SYNC);
+					printf("The result for Detector %d = %f", j, detector_data[j]);
+				}
+			}
+//
+//
+//
+                        strcpy(actual_status, "Scan Finished");
+                        pvPut(actual_status,SYNC);
+                        status_mode=0;
+                        pvPut(status_mode);
+		} state idle
+	}
 
+/*=================== Dummy Loop =========================*/ DEVO FARE UNA SERIE DI LOOP PER DIVERSI MOTORI
+        state dummy_loop {		
+		when() {
+                        printf("\n *******************************\n");
+                        printf("\n ***** Starting Dummy Scan *****\n");
+                        printf("\n *******************************\n");
+//
+//			for (i=num_mot-1; i = 0; i--) {
+//			for (i=0; i < num_mot; i++) {
+			i=num_mot;
+			while (i>0) {
+				i=i-1;
+				printf("the index is %d\n", i);
+			}
 
-
-
+                        status_mode=0;
+                        pvPut(status_mode);
+		} state idle
+	}
 
 }
 

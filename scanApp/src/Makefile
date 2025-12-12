@@ -49,7 +49,10 @@ ifneq ($(SNCSEQ),)
     scan_SNCFLAGS += +r
     scan_DBD += sncscan.dbd
     # A .stt sequence program is *not* pre-processed:
-    scan_SRCS += sncscan.stt
+#    scan_SRCS += sncscan.stt
+    scan_SRCS += xena_sncscan.stt
+    scan_SRCS += rxr_sncscan.stt
+    scan_SRCS += cts_sncscan.stt
     scan_LIBS += seq pv
 endif
 
