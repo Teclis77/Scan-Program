@@ -24,6 +24,45 @@ record(stringin, $(user):experiment) {
 	field(VAL, "$(user)")
 	field(PINI, "YES")
 }
+record(ai, "$(user):total_points") {
+        field(DESC, "Total Number Steps")
+        field(VAL, "0")
+        field(PINI, "YES")
+}
+record(ai, "$(user):current_point") {
+        field(DESC, "General Step Iteration")
+        field(VAL, "0")
+	field(PINI, "YES")
+}
+record(ai, "$(user):scan_progress") {
+	field(DESC, "Scan progress %")
+	field(PREC, "1")
+	field(HOPR, "100")
+	field(LOPR, "0")
+	field(EGU, "%")
+}
+record(ai, "$(user):scan_busy") {
+	field(DESC, "Scan busy")
+	field(VAL, "0")
+	field(PINI, "YES")
+}
+record(ao, "$(user):scan_pause") {
+        field(DESC, "Scan in Pause")
+        field(VAL, "0")
+        field(PINI, "YES")
+}
+record(ao, "$(user):scan_restart") {
+        field(DESC, "Restart Scan")
+        field(VAL, "0")
+        field(PINI, "YES")
+}
+record(ao, "$(user):scan_abort") {
+        field(DESC, "Abort Scan")
+        field(VAL, "0")
+        field(PINI, "YES")
+}
+
+
 #####
 #       Scan Parameters
 #####
