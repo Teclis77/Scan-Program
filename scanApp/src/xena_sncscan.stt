@@ -359,23 +359,23 @@ ss scan_status_mode {
 			printf("\n *** Preparing for Scan ***\n");
 			printf("\n **************************\n");			
 			for (i = 0; i < num_mot; i++) {
-				printf("motor to move = %d\n", i);
+//				printf("motor to move = %d\n", i);
 				motor_ma[i]=start[i];
 				pvPut(motor_ma[i],SYNC);
 				motor_reqmov[i]=1;
-				printf("request moving = %d\n", motor_reqmov[i]);
+//				printf("request moving = %d\n", motor_reqmov[i]);
                                 pvPut(motor_reqmov[i],SYNC);
                                 pvGet(motor_mov[i],SYNC);
-				printf("status moving = %d\n", motor_mov[i]);
+//				printf("status moving = %d\n", motor_mov[i]);
 				while(motor_mov[i]<1) {
 					motor_reqmov[i]=1;
-					printf("request moving = %d\n", motor_reqmov[i]);
+//					printf("request moving = %d\n", motor_reqmov[i]);
 					pvPut(motor_reqmov[i],SYNC);
 					pvGet(motor_mov[i],SYNC);
-					printf("status moving = %d\n", motor_mov[i]);
+//					printf("status moving = %d\n", motor_mov[i]);
 				}
 				pvGet(motor_pos[i], SYNC);
-				printf("Position = %f\n", motor_pos[i]);
+//				printf("Position = %f\n", motor_pos[i]);
 			}
 			flags[0]=1; // Necessary to start the run
                         strcpy(actual_status, "Ready to Start");
@@ -489,23 +489,17 @@ ss scan_status_mode {
                 } state pause_scan
 		when() {
                         for (i = 0; i < num_mot; i++) {
-                                printf("motor to move = %d\n", i);
                                 motor_ma[i]=posit[i];
                                 pvPut(motor_ma[i],SYNC);
                                 motor_reqmov[i]=1;
-                                printf("request moving = %d\n", motor_reqmov[i]);
                                 pvPut(motor_reqmov[i],SYNC);
                                 pvGet(motor_mov[i],SYNC);
-                                printf("status moving = %d\n", motor_mov[i]);
 	                        while(motor_mov[i]<1) {
                                         motor_reqmov[i]=1;
-                                        printf("request moving = %d\n", motor_reqmov[i]);
                                         pvPut(motor_reqmov[i],SYNC);
                                         pvGet(motor_mov[i],SYNC);
-                                        printf("status moving = %d\n", motor_mov[i]);
                                 }
                                 pvGet(motor_pos[i], SYNC);
-                                printf("Position = %f\n", motor_pos[i]);
                         }
 //
 //			Reset Flags
@@ -526,7 +520,8 @@ ss scan_status_mode {
 //	EXIT
 		} state ending
 		when () {
-			printf("%d, %f, %f, %f\n",current_point,posit[0],posit[1],posit[2]);
+			printf("%d, %f, %f\n",current_point,posit[0],posit[1]);
+			printf("%d, %f, %f\n",current_point,motor_pos[0],motor_pos[1]);
 			current_point++;
 //	Doing Acquisition
 
