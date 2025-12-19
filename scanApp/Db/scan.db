@@ -151,7 +151,7 @@ record(subArray, $(user):detector) {
 #	List Detector Commands
 record(waveform, $(user):detector_command) {
         field(DESC, "List Detector Command")
-        field(NELM, "5")
+        field(NELM, "6")
         field(FTVL, "STRING")
-        field(INP, [reqstart,reqdata,data,reqready,ready])
+        field(INP, [reqstart,reqdata,data,reqready,ready,type])
 }
