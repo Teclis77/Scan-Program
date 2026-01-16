@@ -14,8 +14,16 @@ program xena_sncscan
 %{
 #include <math.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <time.h>
+#include <sys/stat.h>
+#include <errno.h>
 
 #define MAX_MOTORS 20
+#define MAX_DETECTORS 20
+
+FILE *detector_files[MAX_DETECTORS];
+char detector_paths[MAX_DETECTORS][512];
 
 }%
 
@@ -23,6 +31,10 @@ program xena_sncscan
 /*=================== Declarations =========================*/
 
 option +r;       /* Make the generated code reentrant, thus allowing more than one instance of the program to run on an IOC */
+//
+string name_server;
+assign name_server to "{user}:server:name";
+monitor name_server;
 //
 string name_exp_pv;
 assign name_exp_pv to "{user}:experiment";
@@ -54,6 +66,13 @@ monitor scan_abort;
 
 int end_scan;
 
+//
+//	Output Configuration Files
+//
+string output_path;
+assign output_path to "{user}:scan:filepath";
+monitor output_path;
+int num_files_open;
 
 //
 //	Definition Scan Parameters
@@ -179,9 +198,11 @@ monitor detector_type;
 int i;
 int j;
 int k;
+int d;
 int command;
 char temp_string[80];
 char temp_status[80];
+int all_connected; 
 //
 //
 //
@@ -193,7 +214,7 @@ ss scan_status_mode {
 			pvGet(name_exp_pv,SYNC);
                         printf("**********************\n");
                         printf("*** Ready for Scan ***\n");
-                        printf("***    Exp Xena    ***\n");
+                        printf("***    Exp %s    ***\n", name_exp_pv);
                         printf("**********************\n");
 			strcpy(actual_status, "Starting Scan Program");
 			pvPut(actual_status,SYNC);
@@ -216,21 +237,20 @@ ss scan_status_mode {
                         printf("***************************\n");
                 } state init_loop
                 when (status_mode==4) {
+                        printf("\n*******************\n");
+                        printf("*** Connecting PV **\n");
+                        printf(" *******************\n");
+                } state wait_connect
+                when (status_mode==5) {
                         printf("\n********************\n");
                         printf("*** Prepare Loop ***\n");
                         printf("********************\n");
 		} state prepare_loop
-/*                when (status_mode==5) {
-                        printf("\n******************\n");
-                        printf("*** Inner Loop ***\n");
-                        printf(" ******************\n");
-                } state inner_loop
-*/
                 when (status_mode==6) {
                         printf("\n******************\n");
-                        printf("*** Dummy Loop ***\n");
+                        printf("*** Loop ***\n");
                         printf("******************\n");
-                } state dummy_loop
+                } state loop
 	}
 //        state idle {
 /*=================== Assign Motor Varibles =========================*/
@@ -244,33 +264,40 @@ ss scan_status_mode {
 				command=0; 
 				sprintf(temp_string, "%s:%s", motor[i], mot_command[command]); 
 				printf("%s\n", temp_string);
+//				sleep(1);
 				pvAssign(motor_mr[i],temp_string); 
 //
                                 command=1;
                                 sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
                                 printf("%s\n", temp_string);
+//				sleep(1);
                                 pvAssign(motor_ma[i],temp_string);
 //
                                 command=2;
                                 sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
                                 printf("%s\n", temp_string);
+//				sleep(1);
                                 pvAssign(motor_reqmov[i],temp_string);
 //
                                 command=3;
                                 sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
                                 printf("%s\n", temp_string);
+//				sleep(1);
                                 pvAssign(motor_mov[i],temp_string);
 //
                                 command=4;
                                 sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
                                 printf("%s\n", temp_string);
+//				sleep(1);
                                 pvAssign(motor_reqpos[i],temp_string);
 //
                                 command=5;
                                 sprintf(temp_string, "%s:%s", motor[i], mot_command[command]);
                                 printf("%s\n", temp_string);
+//				sleep(1);
                                 pvAssign(motor_pos[i],temp_string);
 			}
+//			sleep(1);
                         strcpy(actual_status, "Motors Parameters Assigned - Status 1");
                         pvPut(actual_status,SYNC);
 			status_mode=0;
@@ -356,45 +383,182 @@ ss scan_status_mode {
                 } state idle
         }
 
+/*=================== Conneting PV ===========================*/
+/*=================== status_mode = 4 ========================*/
+	state wait_connect {
+/*		when (pvConnectCount() == pvAssignCount()) {
+			printf("All PVs connected!\n");
+                        strcpy(actual_status, "PV Conneted - Status 4");
+                        pvPut(actual_status,SYNC);
+                        status_mode=0;
+                        pvPut(status_mode);
+		} state idle
+		when (delay(1.0)) {
+			printf("rasterScan: Waiting for connections... (%d/%d connected)\n", pvConnectCount(), pvAssignCount());
+		} state wait_connect
+*/
+		when () {
+			all_connected = 1;
+// PV Motors
+			printf("PV for %d motors\n", num_mot);
+			for (i = 0; i < num_mot; i++) {
+				if (!pvConnected(motor_mr[i])) {
+					all_connected = 0;
+					printf("Motor %d motor_mr not connected\n", i);
+				}
+				if (!pvConnected(motor_ma[i])) {
+					all_connected = 0;
+					printf("Motor %d motor_ma not connected\n", i);
+				}			
+				if (!pvConnected(motor_reqmov[i])) {
+					all_connected = 0;
+					printf("Motor %d motor_reqmov not connected\n", i);
+				}
+				if (!pvConnected(motor_mov[i])) {
+					all_connected = 0;
+					printf("Motor %d motor_mov not connected\n", i);
+				}
+				if (!pvConnected(motor_reqpos[i])) {
+					all_connected = 0;
+					printf("Motor %d motor_reqpos not connected\n", i);
+				}
+				if (!pvConnected(motor_pos[i])) {
+					all_connected = 0;
+					printf("Motor %d motor_pos not connected\n", i);
+				}
+			}
+			printf("Status PV-Motors Connections = %d\n", all_connected);
+// PV Detectors
+			printf("PV for %d detetors\n", num_det);
+			for (i = 0; i < num_det; i++) {
+				if (!pvConnected(detector_reqstart[i])) {
+					all_connected = 0;
+					printf("Detector %d detector_reqstart not connected\n", i);
+				}
+				if (!pvConnected(detector_reqdata[i])) {
+					all_connected = 0;
+					printf("Detector %d detector_reqdata not connected\n", i);
+				}			
+				if (!pvConnected(detector_data[i])) {
+					all_connected = 0;
+					printf("Detector %d detector_data not connected\n", i);
+				}
+				if (!pvConnected(detector_reqready[i])) {
+					all_connected = 0;
+					printf("Detector %d detector_reqready not connected\n", i);
+				}
+				if (!pvConnected(detector_ready[i])) {
+					all_connected = 0;
+					printf("Detector %d detector_ready not connected\n", i);
+				}
+				if (!pvConnected(detector_type[i])) {
+					all_connected = 0;
+					printf("Detector %d detector_type not connected\n", i);
+				}
+			}
+			printf("Status PV-Detectors Connections = %d\n", all_connected);
+			if (all_connected==1) {
+				printf("All PVs are connected!\n");
+				strcpy(actual_status, "Detect. Parameters Assigned - Status 4");
+				pvPut(actual_status,SYNC);
+				status_mode=0;
+				pvPut(status_mode);
+			} else {
+                                printf("All PVs are NOT connected!\n");
+                                strcpy(actual_status, "Error in PV Connection - Status 4");
+                                pvPut(actual_status,SYNC);
+                                status_mode=0;
+                                pvPut(status_mode);
+			}
+		} state idle
+//
+//		when (delay(30.0)) {
+//			printf("ERROR: Timeout waiting for PV connections\n");
+//			printf("Connected: %d of %d\n", pvConnectCount(), pvAssignCount());
+//		} state error_connect
+	}
+
 
 /*=================== Preparing Scan =========================*/
-/*=================== status_mode = 4 ========================*/
+/*=================== status_mode = 5 ========================*/
         state prepare_loop {
 		when () {
 			for (i = 0; i < num_mot; i++) {
 				printf("motor to move = %d\n", i);
 				printf("start[%d]= %f\n", i, start[i]);
 				motor_ma[i]=start[i];
-				printf("motors\n");
 				pvPut(motor_ma[i],SYNC);
 				motor_reqmov[i]=1;
-//				printf("request moving = %d\n", motor_reqmov[i]);
-				printf("1\n");
                                 pvPut(motor_reqmov[i],SYNC);
-				printf("2\n");
                                 pvGet(motor_mov[i],SYNC);
-				printf("3\n");
-//				printf("status moving = %d\n", motor_mov[i]);
 				while(motor_mov[i]<1) {
 					motor_reqmov[i]=1;
-//					printf("request moving = %d\n", motor_reqmov[i]);
 					pvPut(motor_reqmov[i],SYNC);
 					pvGet(motor_mov[i],SYNC);
-//					printf("status moving = %d\n", motor_mov[i]);
 				}
 				pvGet(motor_pos[i], SYNC);
-//				printf("Position = %f\n", motor_pos[i]);
 			}
 			flags[0]=1; // Necessary to start the run
-                        strcpy(actual_status, "Ready to Start");
+                        strcpy(actual_status, "Ready to Start - status 5");
                         pvPut(actual_status,SYNC);
                         status_mode=0;
                         pvPut(status_mode);
-		} state dummy_loop
+		} state open_file
 	}
-/*=================== Dummy Loop =========================*/ 
+//
+//	Preparing Save Files
+//
+	state open_file {
+		when() {
+%{
+			char timestamp[64];
+			time_t now;
+			struct tm *tm_info;			
+}%
+			num_files_open = 0;
+			for (i = 0; i < MAX_DETECTORS; i++) {
+				detector_files[i] = NULL;
+			}
+			time(&now);
+			tm_info = localtime(&now);
+			strftime(timestamp, sizeof(timestamp), "%Y%m%d_%H%M%S", tm_info);
+			for (i = 0; i < num_det; i++) {
+/* Costruisci path completo per questo detector */
+//				snprintf(detector_paths[i], sizeof(detector_paths[i]),"%s/scan_%s_%s.dat", output_path, detector[i], timestamp)
+				snprintf(detector_paths[i], sizeof(detector_paths[i]),"/home/%s/%s/scan_%s_%s.dat", name_server, output_path, detector[i], timestamp);
+				printf("Scan: Opening file for detector %i: %s\n", i+1, detector_paths[i]);
+				
+/* Apri file per questo detector */
+				detector_files[i] = fopen(detector_paths[i], "w");
+				if (detector_files[i] == NULL) {
+					printf("Scan: ERROR - Cannot open file %s: %s\n", detector_paths[i], strerror(errno));
+				} else {
+					num_files_open++;
+/* Scrivi header per questo detector */
+					fprintf(detector_files[i], "# Raster Scan Data - Detector %d\n", i+1);
+					fprintf(detector_files[i], "# Timestamp: %s\n", timestamp);
+					fprintf(detector_files[i], "# Number of motors: %d\n", num_mot);
+					fprintf(detector_files[i], "# Columns: ");
+					for (j = 0; j < num_mot; j++) {
+						fprintf(detector_files[i], "Motor%d\t", j+1);
+					}
+					fprintf(detector_files[i], "Detector%d\n", i+1);
+					fflush(detector_files[i]);
+				}
+			}
+
+			printf("Scan: Opened %d detector files successfully\n", num_files_open);
+			if (num_files_open == 0) {
+				printf("Scan: ERROR - No files opened! Check path and permissions\n");
+			}
+		} state loop
+	}
+
+
+
+/*====================== Loop ============================*/ 
 /*================= status_mode = 6 ======================*/
-        state dummy_loop {
+        state loop {
 		when(scan_abort==1) {
 			printf("Scan Aborted by User\n");
 		} state abort_scan
@@ -486,7 +650,7 @@ ss scan_status_mode {
 			for (j=0; j < num_det; j++) {
 				detector_reqstart[j]=1;
 				pvPut(detector_reqstart[j],SYNC);
-				printf("Starting Acquisition");
+//				printf("Starting Acquisition");
 				detector_reqready[j]=1;
 				pvPut(detector_reqready[j],SYNC);
 				pvGet(detector_ready[j],SYNC);
@@ -498,28 +662,44 @@ ss scan_status_mode {
 //				detector_reqdata[j]=1;
 //				pvPut(detector_reqdata[j],SYNC);
 				pvGet(detector_data[j],SYNC);
-				printf("The result for Detector %d = %f", j, detector_data[j]);
+//
+				if (detector_type[j] == 1) {
+//					printf("The result for Detector %d = %f\n", j, detector_data[j]);
+					printf("%d, %f, %f, %.0f\n",current_point,motor_pos[0],motor_pos[1],detector_data[j]);
+					for (k=0; k<num_mot; k++) {
+						fprintf(detector_files[j], "%.3f\t", motor_pos[k]);
+					}
+				fprintf(detector_files[j], "%.0f\n", detector_data[j]);
+				fflush(detector_files[d]);
+				} else if (detector_type[j] == 2) {
+//                                      printf("The result for Detector %d = %f\n", j, detector_data[j]);
+                                        printf("%d, %f, %f, %.0f\n",current_point,motor_pos[0],motor_pos[1],detector_data[j]);
+				} else {
+//                                      printf("The result for Detector %d = %f\n", j, detector_data[j]);
+                                        printf("%d, %f, %f, %.0f\n",current_point,motor_pos[0],motor_pos[1],detector_data[j]);
+				}
 			}
 //
-			printf("%d, %f, %f\n",current_point,posit[0],posit[1]);
-			printf("%d, %f, %f\n",current_point,motor_pos[0],motor_pos[1]);
+//			printf("%d, %f, %f\n",current_point,posit[0],posit[1]);
+//			printf("%d, %f, %f\n",current_point,motor_pos[0],motor_pos[1]);
 			current_point++;
 		} state positions
 
 	}
 
 
-// END SCAN
+/*=================== End Scan =========================*/
 	state ending {
                 when() {
-                        printf("\n ****************\n");
-                        printf("\n *** End Scan ***\n");
-                        printf("\n ****************\n");
+                        printf("\n****************\n");
+                        printf("*** End Scan ***\n");
+                        printf("****************\n");
                         status_mode=0;
                         pvPut(status_mode,SYNC);
-                } state idle
+                        status_mode=0;
+                        pvPut(status_mode,SYNC);
+                } state close_file
 	}
-
 
 /*=================== Abort Scan =========================*/
 	state abort_scan {
@@ -533,7 +713,22 @@ ss scan_status_mode {
 			pvPut(scan_abort,SYNC);
 			status_mode=0;
 			pvPut(status_mode,SYNC);
+		} state close_file
+	}
+/*=================== Close File =========================*/
+	state close_file {
+		when () {
+			for (i = 0; i < num_det; i++) {
+				if (detector_files[i] != NULL) {
+					fclose(detector_files[i]);
+					detector_files[i] = NULL;
+					printf("Scan: Closed file: %s\n", detector_paths[i]);
+				}
+			}
+			num_files_open = 0;
+			printf("Scan: All files closed\n");
 		} state idle
+
 	}
 /*=================== Pause =========================*/
 	state pause_scan {
@@ -550,8 +745,26 @@ ss scan_status_mode {
 			epicsThreadSleep(0.5);
 		} state pause_scan
 	}
-}
 
+/*=================== Error Connection =========================*/
+	state error_connect {
+		when () {
+			printf("System in error state\n");
+			printf("Check PV connections and IOC status\n");
+                        strcpy(actual_status, "Error PV Connection - Status 4");
+                        pvPut(actual_status,SYNC);
+                        status_mode=0;
+                        pvPut(status_mode);
+		} state idle
+//		when (delay(5.0)) {
+//			printf("rasterScan: Retrying connection...\n");
+//		} state wait_connect
+	}
+
+
+
+
+}
 /*
 SPDX-FileCopyrightText: 1998 Argonne National Laboratory
 

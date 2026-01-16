@@ -16,15 +16,18 @@ dbLoadDatabase "dbd/scan.dbd"
 scan_registerRecordDeviceDriver pdbbase
 
 ## Load record instances
-dbLoadRecords("db/scan.db","user=xena")
-dbLoadRecords("db/scan.db","user=rxr")
-dbLoadRecords("db/scan.db","user=cts")
+dbLoadRecords("db/scan.db","user=xena,server=xlabsrv2")
+dbLoadRecords("db/scan.db","user=rxr,server=xlabsrv2")
+dbLoadRecords("db/scan.db","user=cts,server=xlabsrv2")
 #dbLoadTemplate("db/scan.val","user=xlabsrv2")
 
 cd "${TOP}/iocBoot/${IOC}"
 iocInit
 
 ## Start any sequence programs
-seq xena_sncscan,"user=xena"
-seq rxr_sncscan,"user=rxr"
-seq cts_sncscan,"user=cts"
+seq xena_sncscan,"user=xena,server=xlabsrv2"
+seq rxr_sncscan,"user=rxr,server=xlabsrv2"
+seq cts_sncscan,"user=cts,server=xlabsrv2"
+#seq xena_sncscan,"user=xena"
+#seq rxr_sncscan,"user=rxr"
+#seq cts_sncscan,"user=cts"

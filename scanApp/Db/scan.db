@@ -61,7 +61,19 @@ record(ao, "$(user):scan_abort") {
         field(VAL, "0")
         field(PINI, "YES")
 }
-
+#####
+#	Save Path 
+#####
+record(stringout, $(user):scan:filepath) {
+	field(DESC, "Output file path")
+	field(VAL, "temp/data")
+	field(PINI, "YES")
+}
+record(stringout, $(user):server:name) {
+	field(DESC, "Name Server")
+	field(VAL, "$(server)")
+	field(PINI, "YES")
+}
 
 #####
 #       Scan Parameters
@@ -155,3 +167,36 @@ record(waveform, $(user):detector_command) {
         field(FTVL, "STRING")
         field(INP, [reqstart,reqdata,data,reqready,ready,type])
 }
+#
+#	PV test
+#
+#record(bo, $(user):reqtestpv) {
+#	field(DESC, "start test pv")
+#	field(FLNK, "$(user):testpv")
+#	field(PINI, "NO")
+#}
+#record(stringout, $(user):nametestpv_1) {
+#	field(DESC, "pv req to trace")
+#	field(VAL, "mm4006_1_1_1:reqpos")
+#	field(PINI, "YES")
+#}
+#record(stringout, $(user):nametestpv_2) {
+#        field(DESC, "pv resp to trace")
+#        field(VAL, "mm4006_1_1_1:reqpos")
+#        field(PINI, "YES")
+#}
+##record(seq, $(user):testpv) {
+#record(dfanout, $(user):testpv) {
+#	field(DESC, "comunicate with the PV")
+#	field(OUTA, "$(user):nametestpv_1 NPP")
+#	field(OUTB, "$(user):nametestpv_2 NPP")
+##	field(DOl0, "1")
+##	field(INP0, "$(user):nametestpv_1 CP")
+##	field(LNK0, "$(user):testpv:exec1 PP")
+##	field(LNK0, "$(user):nametestpv_1.VAL")
+##	field(DO1, "1")
+##	field(DLY1, "0.5")
+##        field(INP1, "$(user):nametestpv_2 CP")
+##        field(LNK1, "$(user):testpv:exec2 PP")
+##	field(LNK1, "$(user):nametestpv_2")
+#}
