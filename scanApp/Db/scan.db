@@ -146,9 +146,9 @@ record(subArray, $(user):motor) {
 #	List Motor Commands
 record(waveform, $(user):motor_command) {
         field(DESC, "List Motor Command")
-        field(NELM, "6")
+        field(NELM, "7")
         field(FTVL, "STRING")
-	field(INP, [setmr,setma,reqmoving,moving,reqpos,pos])
+	field(INP, [setmr,setma,reqmoving,moving,reqpos,pos,busy])
 }
 #####
 #	Definition Detector
@@ -163,40 +163,7 @@ record(subArray, $(user):detector) {
 #	List Detector Commands
 record(waveform, $(user):detector_command) {
         field(DESC, "List Detector Command")
-        field(NELM, "6")
+        field(NELM, "7")
         field(FTVL, "STRING")
-        field(INP, [reqstart,reqdata,data,reqready,ready,type])
+        field(INP, [reqstart,reqdata,data,reqready,ready,type,busy])
 }
-#
-#	PV test
-#
-#record(bo, $(user):reqtestpv) {
-#	field(DESC, "start test pv")
-#	field(FLNK, "$(user):testpv")
-#	field(PINI, "NO")
-#}
-#record(stringout, $(user):nametestpv_1) {
-#	field(DESC, "pv req to trace")
-#	field(VAL, "mm4006_1_1_1:reqpos")
-#	field(PINI, "YES")
-#}
-#record(stringout, $(user):nametestpv_2) {
-#        field(DESC, "pv resp to trace")
-#        field(VAL, "mm4006_1_1_1:reqpos")
-#        field(PINI, "YES")
-#}
-##record(seq, $(user):testpv) {
-#record(dfanout, $(user):testpv) {
-#	field(DESC, "comunicate with the PV")
-#	field(OUTA, "$(user):nametestpv_1 NPP")
-#	field(OUTB, "$(user):nametestpv_2 NPP")
-##	field(DOl0, "1")
-##	field(INP0, "$(user):nametestpv_1 CP")
-##	field(LNK0, "$(user):testpv:exec1 PP")
-##	field(LNK0, "$(user):nametestpv_1.VAL")
-##	field(DO1, "1")
-##	field(DLY1, "0.5")
-##        field(INP1, "$(user):nametestpv_2 CP")
-##        field(LNK1, "$(user):testpv:exec2 PP")
-##	field(LNK1, "$(user):nametestpv_2")
-#}
