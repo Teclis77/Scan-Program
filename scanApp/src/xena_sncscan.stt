@@ -22,8 +22,8 @@ program xena_sncscan
 #define MAX_MOTORS 20
 #define MAX_DETECTORS 20
 
-FILE *detector_files[MAX_DETECTORS];
-char detector_paths[MAX_DETECTORS][512];
+static FILE *detector_files[MAX_DETECTORS];
+static char detector_paths[MAX_DETECTORS][512];
 
 }%
 

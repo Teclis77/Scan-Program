@@ -9,7 +9,7 @@
 //#################################################
 //#
 //
-program cts_sncscan
+program vitruvio_sncscan
 
 %{
 #include <math.h>

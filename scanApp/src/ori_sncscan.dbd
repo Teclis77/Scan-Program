@@ -7,7 +7,6 @@
 # program is called sncExample, but is compiled in both the
 # sncExample.stt and sncProgram.st source files.
 #registrar(sncscanRegistrar)
-registrar(vitruvio_sncscanRegistrar)
-#registrar(xena_sncscanRegistrar)
-#registrar(rxr_sncscanRegistrar)
-#registrar(cts_sncscanRegistrar)
+registrar(xena_sncscanRegistrar)
+registrar(rxr_sncscanRegistrar)
+registrar(cts_sncscanRegistrar)

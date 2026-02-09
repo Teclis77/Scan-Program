@@ -25,9 +25,9 @@ cd "${TOP}/iocBoot/${IOC}"
 iocInit
 
 ## Start any sequence programs
-seq xena_sncscan,"user=xena,server=xlabsrv2"
-seq rxr_sncscan,"user=rxr,server=xlabsrv2"
-seq cts_sncscan,"user=cts,server=xlabsrv2"
-#seq xena_sncscan,"user=xena"
-#seq rxr_sncscan,"user=rxr"
-#seq cts_sncscan,"user=cts"
+seq vitruvio_sncscan,"user=xena,server=xlabsrv2"
+seq vitruvio_sncscan,"user=rxr,server=xlabsrv2"
+seq vitruvio_sncscan,"user=cts,server=xlabsrv2"
+#seq xena_sncscan,"user=xena,server=xlabsrv2"
+#seq rxr_sncscan,"user=rxr,server=xlabsrv2"
+#seq cts_sncscan,"user=cts,server=xlabsrv2"
