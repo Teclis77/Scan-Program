@@ -11,6 +11,8 @@
 
 cd "${TOP}"
 
+epicsEnvSet ("STREAM_PROTOCOL_PATH", "${TOP}/db")
+
 ## Register all support components
 dbLoadDatabase "dbd/scan.dbd"
 scan_registerRecordDeviceDriver pdbbase
