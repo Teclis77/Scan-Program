@@ -14,6 +14,11 @@ record(ai, $(user):status) {
 	field(VAL, "0")
 	field(PINI, "YES")
 }
+record(ai, $(user):end_scan) {
+	field(DESC, "Scan end? (1=yes)")
+	field(VAL, "1")
+	field(PINI, "YES")
+}
 record(stringin, $(user):state) {
 	field(DESC, "Actual State")
 	field(VAL, "Idle")
@@ -40,6 +45,8 @@ record(ai, "$(user):scan_progress") {
 	field(HOPR, "100")
 	field(LOPR, "0")
 	field(EGU, "%")
+	field(VAL, "0")
+	field(PINI, "YES")
 }
 record(ai, "$(user):scan_busy") {
 	field(DESC, "Scan busy")

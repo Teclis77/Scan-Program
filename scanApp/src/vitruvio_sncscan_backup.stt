@@ -65,9 +65,9 @@ monitor scan_restart;
 int scan_abort;
 assign scan_abort to "{user}:scan_abort";
 monitor scan_abort;
+
 int end_scan;
-assign end_scan to "{user}:end_scan";
-monitor end_scan;
+
 //
 //	Output Configuration Files
 //
@@ -321,7 +321,7 @@ ss scan_status_mode {
 			strcpy(actual_status,local_actual_status);
 			pvPut(actual_status,SYNC);
 			status_mode=0;
-			pvPut(status_mode,SYNC);
+			pvPut(status_mode);
 		} state idle
 	}
 /*=================== Assign Detector Varibles =========================*/
@@ -371,7 +371,7 @@ ss scan_status_mode {
 			strcpy(actual_status,local_actual_status);
 			pvPut(actual_status,SYNC);
 			status_mode=0;
-			pvPut(status_mode,SYNC);
+			pvPut(status_mode);
 		} state idle
 	}
 /*=================== Initialize Loop =========================*/
@@ -380,7 +380,6 @@ ss scan_status_mode {
 	state init_loop {
 		when() {
 			end_scan=0; // initialize end scan
-			pvPut(end_scan,SYNC);
 			total_points = 1;
 			for (i = 0; i < num_mot; i++) {
 				flags[i]=0;  // init flags
@@ -461,7 +460,7 @@ ss scan_status_mode {
 			strcpy(actual_status,local_actual_status);
 			pvPut(actual_status,SYNC);
 			status_mode=0;
-			pvPut(status_mode,SYNC);
+			pvPut(status_mode);
 		} state idle
 	}
 
@@ -474,7 +473,7 @@ ss scan_status_mode {
 			strcpy(actual_status,local_actual_status);
 			pvPut(actual_status,SYNC);
 			status_mode=0;
-			pvPut(status_mode,SYNC);
+			pvPut(status_mode);
 		} state idle
 		when (delay(1.0)) {
 			printf("rasterScan: Waiting for connections... (%d/%d connected)\n", pvConnectCount(), pvAssignCount());
@@ -554,14 +553,14 @@ ss scan_status_mode {
 				strcpy(actual_status,local_actual_status);
 				pvPut(actual_status,SYNC);
 				status_mode=0;
-				pvPut(status_mode,SYNC);
+				pvPut(status_mode);
 			} else {
 				printf("All PVs are NOT connected!\n");
 				strcpy(local_actual_status, "Error in PV Connection - Status 4");
 				strcpy(actual_status,local_actual_status);
 				pvPut(actual_status,SYNC);
 				status_mode=0;
-				pvPut(status_mode,SYNC);
+				pvPut(status_mode);
 			}
 		} state idle
 //
@@ -610,8 +609,8 @@ ss scan_status_mode {
 			strcpy(local_actual_status, "Ready to Start - status 5");
 			strcpy(actual_status,local_actual_status);
 			pvPut(actual_status,SYNC);
-			status_mode=6;
-			pvPut(status_mode,SYNC);
+			status_mode=0;
+			pvPut(status_mode);
 		} state open_file
 	}
 //
@@ -674,8 +673,8 @@ ss scan_status_mode {
 			strcpy(actual_status,local_actual_status);
 			strcpy(actual_status, temp_status);
 			pvPut(actual_status,SYNC);
-//			status_mode=0;
-//			pvPut(status_mode,SYNC);
+			status_mode=0;
+			pvPut(status_mode);
 		} state loops
 	}
 
@@ -703,7 +702,6 @@ ss scan_status_mode {
 					printf("step=%d, i=%d, flag[%d]=%d, posit[%d]=%f, index[%d]=%d\n", current_point, i, i, flags[i], i, posit[i], i, index[i]);
 					if (flags[i] == 2 && i == num_mot-1) {
 						end_scan=1;
-						pvPut(end_scan,SYNC);
 					} else if (flags[i] == 2) {
 						flags[i+1]=1;
 					} else {
@@ -748,8 +746,8 @@ ss scan_status_mode {
 			}
 			flags[0]=1;
 //
-//			status_mode=0;
-//			pvPut(status_mode,SYNC);
+			status_mode=0;
+			pvPut(status_mode);
 		} state loops
 	}
 
@@ -799,8 +797,7 @@ ss scan_status_mode {
 			current_point++;
 			pvPut(current_point,SYNC);
 			scan_progress=100*current_point/total_points;
-			pvPut(scan_progress,SYNC);
-			printf("Actual Step = %d,  Progress = %f\n",current_point,scan_progress);
+			pvPut(scan_progress);
 		} state positions
 
 	}
@@ -825,8 +822,6 @@ ss scan_status_mode {
 			pvPut(actual_status,SYNC);
 			scan_busy=0;
 			pvPut(scan_busy,SYNC);
-			current_point++;
-			pvPut(current_point,SYNC);
 			scan_progress = 0;
 			pvPut(scan_progress,SYNC);
 			status_mode=0;
@@ -848,8 +843,6 @@ ss scan_status_mode {
 			printf("rasterScan: Cleaning up after abort\n");
 //			scan_running = 0;
 //			pvPut(scan_running);
-			current_point++;
-			pvPut(current_point,SYNC);
 			scan_progress = 0;
 			pvPut(scan_progress,SYNC);
 			scan_abort = 0;
@@ -898,7 +891,7 @@ ss scan_status_mode {
 			strcpy(actual_status,local_actual_status);
 			pvPut(actual_status,SYNC);
 			status_mode=0;
-			pvPut(status_mode,SYNC);
+			pvPut(status_mode);
 		} state idle
 //		when (delay(5.0)) {
 //			printf("rasterScan: Retrying connection...\n");
@@ -913,7 +906,7 @@ ss scan_status_mode {
 			strcpy(actual_status,local_actual_status);
 			pvPut(actual_status,SYNC);
 			status_mode=0;
-			pvPut(status_mode,SYNC);
+			pvPut(status_mode);
 		} state idle
 	}
 
