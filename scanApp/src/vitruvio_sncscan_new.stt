@@ -18,7 +18,6 @@ program vitruvio_sncscan
 #include <time.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include "vitruvio_utils.h"
 
 #define MAX_MOTORS 20
 #define MAX_DETECTORS 20
@@ -201,11 +200,10 @@ assign detector_status to {};
 monitor detector_status;
 //
 string data_out[20];
-//assign data_out to "{user}:data_out";
-assign data_out to {};
+assign data_out to "{user}:data_out";
 monitor data_out;
 string files_out[20];
-assign files_out to {};
+assign files_out to "{user}:filename";
 monitor files_out;
 //
 
@@ -216,7 +214,6 @@ int d;
 int command;
 char temp_string[80];
 char temp_status[80];
-char full_save_path[80];
 char temp_exp[40];
 int all_connected;
 int checkbusy;
@@ -643,38 +640,28 @@ ss scan_status_mode {
 			for (i = 0; i < num_det; i++) {
 /* Costruisci path completo per questo detector */
 //				snprintf(detector_paths[i], sizeof(detector_paths[i]),"%s/scan_%s_%s.dat", output_path, detector[i], timestamp)
-//				snprintf(detector_paths[i], sizeof(detector_paths[i]),"/home/%s/%s/scan_%s_%s.dat", name_server, output_path, detector[i], timestamp);
-//
-//				Only for Counting Detectors
-//
-				if (detector_type[i]==1) {
-					snprintf(detector_paths[i], sizeof(detector_paths[i]),"/home/%s/%s/scan_%s_%s_%s.dat", name_server, output_path, name_exp_pv, detector[i], timestamp);
-					printf("Scan: Opening file for detector %i: %s\n", i+1, detector_paths[i]);
+				snprintf(detector_paths[i], sizeof(detector_paths[i]),"/home/%s/%s/scan_%s_%s.dat", name_server, output_path, detector[i], timestamp);
+				printf("Scan: Opening file for detector %i: %s\n", i+1, detector_paths[i]);
 				
 /* Apri file per questo detector */
-					detector_files[i] = fopen(detector_paths[i], "w");
-					if (detector_files[i] == NULL) {
-						printf("Scan: ERROR - Cannot open file %s: %s\n", detector_paths[i], strerror(errno));
-					} else {
-						num_files_open++;
+				detector_files[i] = fopen(detector_paths[i], "w");
+				if (detector_files[i] == NULL) {
+					printf("Scan: ERROR - Cannot open file %s: %s\n", detector_paths[i], strerror(errno));
+				} else {
+					num_files_open++;
 /* Scrivi header per questo detector */
-						fprintf(detector_files[i], "# Raster Scan Data - Detector %d\n", i+1);
-						fprintf(detector_files[i], "# Timestamp: %s\n", timestamp);
-						fprintf(detector_files[i], "# Number of motors: %d\n", num_mot);
-						fprintf(detector_files[i], "# Columns: ");
-						for (j = 0; j < num_mot; j++) {
-							fprintf(detector_files[i], "Motor%d\t", j+1);
-						}
-						fprintf(detector_files[i], "Detector%d\n", i+1);
-						fflush(detector_files[i]);
+					fprintf(detector_files[i], "# Raster Scan Data - Detector %d\n", i+1);
+					fprintf(detector_files[i], "# Timestamp: %s\n", timestamp);
+					fprintf(detector_files[i], "# Number of motors: %d\n", num_mot);
+					fprintf(detector_files[i], "# Columns: ");
+					for (j = 0; j < num_mot; j++) {
+						fprintf(detector_files[i], "Motor%d\t", j+1);
 					}
-//					if (detector_type[i] > 1) {
-					printf("Detector Type %d is greater than 1", i);
-					sprintf(temp_string, "scan_%s_%s_%s.dat", name_exp_pv, detector[i], timestamp);
-					pvAssign(files_out[i],temp_string);
-//					}
+					fprintf(detector_files[i], "Detector%d\n", i+1);
+					fflush(detector_files[i]);
 				}
 			}
+
 			printf("Scan: Opened %d detector files successfully\n", num_files_open);
 			if (num_files_open == 0) {
 				printf("Scan: ERROR - No files opened! Check path and permissions\n");
@@ -774,13 +761,6 @@ ss scan_status_mode {
 
 // LOOP ACQUISIZIONI
 //	EXIT
-/*
-%%	void generate_filename(char *out, int maxlen, const char *name_exp, const char *det_name, const char *timestamp, int step)
-%%	{
-%%		snprintf(out, maxlen, "scan_%s_%s_%s_step%04d.dat",name_exp, det_name, timestamp, step);
-%%	}
-%%
-*/
 	state acquiring {
 		when (end_scan==1) {
 		} state ending
@@ -789,6 +769,7 @@ ss scan_status_mode {
 			for (j=0; j < num_det; j++) {
 				detector_reqstart[j]=1;
 				pvPut(detector_reqstart[j],SYNC);
+//				printf("Starting Acquisition");
 				detector_reqready[j]=1;
 				pvPut(detector_reqready[j],SYNC);
 				pvGet(detector_ready[j],SYNC);
@@ -797,28 +778,20 @@ ss scan_status_mode {
 					pvPut(detector_reqready[j],SYNC);
 					pvGet(detector_ready[j],SYNC);
 				}
-//				Per detector con vettori/array, il file viene salvato direttamente
-//				pvGet(detector_data[j],SYNC);
+//				detector_reqdata[j]=1;
+//				pvPut(detector_reqdata[j],SYNC);
+				pvGet(detector_data[j],SYNC);
 //
 				if (detector_type[j] == 1) {
-//				Per detector con singolo valore, il dato deve essere acquisito
-					pvGet(detector_data[j],SYNC);
+//					printf("The result for Detector %d = %f\n", j, detector_data[j]);
+//					printf("%d, %f, %f, %.0f\n",current_point,posit[0],posit[1],detector_data[j]);
+//					printf("%d, %f, %f, %.0f\n",current_point,motor_pos[0],motor_pos[1],detector_data[j]);
 					for (k=0; k<num_mot; k++) {
 						fprintf(detector_files[j], "%.3f\t", motor_pos[k]);
 					}
-					fprintf(detector_files[j], "%.0f\n", detector_data[j]);
-					fflush(detector_files[j]);
+				fprintf(detector_files[j], "%.0f\n", detector_data[j]);
+				fflush(detector_files[d]);
 				} else if (detector_type[j] == 2) {
-
-//					generate_filename_with_time(char *fullpath, int maxlen_path, char *filename, int maxlen_name, const char *base_path, const char *name_exp, const char *det_name, int step)
-					sprintf(full_save_path, "/home/%s/%s", name_server, output_path);
-					generate_filename_with_time(detector_paths[i], sizeof(detector_paths[i]), temp_string, sizeof(temp_string), full_save_path, name_exp_pv, detector[i], current_point);
-					pvAssign(files_out[i],temp_string);
-//snprintf(detector_paths[i], sizeof(detector_paths[i]),"/home/%s/%s/scan_%s_%s_%s.dat", name_server, output_path, name_exp_pv, detector[i], timestamp);
-//files_out[i] detector_paths[i]
-//sprintf(temp_string, "scan_%s_%s_%s.dat", name_exp_pv, detector[i], timestamp);
-//pvAssign(files_out[i],temp_string);
-//					generate_filename_with_time(temp_string, sizeof(temp_string), name_exp_pv, detector[j], current_point);
 //					printf("The result for Detector %d = %f\n", j, detector_data[j]);
 //					printf("%d, %f, %f, %.0f\n",current_point,motor_pos[0],motor_pos[1],detector_data[j]);
 				} else {
@@ -827,6 +800,8 @@ ss scan_status_mode {
 				}
 			}
 //
+//			printf("%d, %f, %f\n",current_point,posit[0],posit[1]);
+//			printf("%d, %f, %f\n",current_point,motor_pos[0],motor_pos[1]);
 			current_point++;
 			pvPut(current_point,SYNC);
 			scan_progress=100*current_point/total_points;

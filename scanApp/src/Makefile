@@ -51,6 +51,7 @@ ifneq ($(SNCSEQ),)
     # A .stt sequence program is *not* pre-processed:
 #    scan_SRCS += vitruvio_sncscan.stt
     scan_SRCS += vitruvio_sncscan.stt
+    scan_SRCS += vitruvio_utils.c
 #    scan_SRCS += xena_sncscan.stt
 #    scan_SRCS += rxr_sncscan.stt
 #    scan_SRCS += cts_sncscan.stt

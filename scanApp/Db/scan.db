@@ -81,7 +81,13 @@ record(stringout, $(user):server:name) {
 	field(VAL, "$(server)")
 	field(PINI, "YES")
 }
-
+record(subArray, $(user):filename) {
+	field(NELM, "20")
+	field(MALM, "20")
+	field(INDX, "0")
+	field(FTVL, "STRING")
+	field(PREC, "3")
+}
 #####
 #       Scan Parameters
 #####
@@ -173,4 +179,14 @@ record(waveform, $(user):detector_command) {
         field(NELM, "7")
         field(FTVL, "STRING")
         field(INP, [reqstart,reqdata,data,reqready,ready,type,busy])
+}
+#####
+#	Out for Control
+#####
+record(subArray, $(user):data_out) {
+	field(NELM, "20")
+	field(MALM, "20")
+	field(INDX, "0")
+	field(FTVL, "STRING")
+	field(PREC, "3")
 }
