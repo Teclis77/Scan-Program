@@ -8,4 +8,6 @@ void generate_filename(char *fullpath, int maxlen_path, char *filename, int maxl
 //void generate_filename_with_time(char *out, int maxlen, const char *name_exp, const char *det_name, int step);
 void generate_filename_with_time(char *fullpath, int maxlen_path, char *filename, int maxlen_name, const char *base_path, const char *name_exp, const char *det_name, int step);
 
+void generate_general_filename(char *fullpath, int maxlen_path, char *filename, int maxlen_name, const char *base_path, const char *name_exp);
+
 #endif
