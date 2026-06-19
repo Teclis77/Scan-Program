@@ -19,6 +19,7 @@ program vitruvio_sncscan
 #include <sys/stat.h>
 #include <errno.h>
 #include "vitruvio_utils.h"
+#include <epicsThread.h>
 
 #define MAX_MOTORS 20
 #define MAX_DETECTORS 20
@@ -844,6 +845,7 @@ ss scan_status_mode {
 				detector_reqstart[j]=1;
 				pvPut(detector_reqstart[j],SYNC);
 			}
+		allready = 1;		
 		} state waiting_ready
 	}
 //	Phase 2 - Pull untill all ready
@@ -855,10 +857,12 @@ ss scan_status_mode {
 			for (j=0; j < num_det; j++) {
 				detector_reqready[j]=1;
 				pvPut(detector_reqready[j],SYNC);
+				epicsThreadSleep(1.0);
 				pvGet(detector_ready[j],SYNC);
 				if (detector_ready[j]<1) {
 					allready++;
 				}
+				epicsThreadSleep(1.0);
 			}
 		} state waiting_ready
 	}

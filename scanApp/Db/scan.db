@@ -126,7 +126,7 @@ record(subArray, $(user):start) {
 	field(NELM, "20")
 	field(MALM, "20")
 	field(INDX, "0")
-        field(FTVL, "SHORT")
+        field(FTVL, "DOUBLE")
         field(PREC, "3")
 }
 record(subArray, $(user):end) {
@@ -134,7 +134,7 @@ record(subArray, $(user):end) {
         field(NELM, "20")
         field(MALM, "20")
         field(INDX, "0")
-        field(FTVL, "SHORT")
+        field(FTVL, "DOUBLE")
         field(PREC, "3")
 }
 record(subArray, $(user):step) {
@@ -142,7 +142,7 @@ record(subArray, $(user):step) {
         field(NELM, "20")
         field(MALM, "20")
         field(INDX, "0")
-        field(FTVL, "SHORT")
+        field(FTVL, "DOUBLE")
         field(PREC, "3")
 }
 #####
