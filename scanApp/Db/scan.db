@@ -1,11 +1,11 @@
 #################################################
-# ###                                       ### #
-# ### Epics database for	            ### #
-# ### SCAN System	                    ### #
-# ###                                       ### #
-# ### author: D. Hampai - M. Montis         ### #
-# ###                                       ### #
-# ### Ref 1.0; 2025-12-04                   ### #
+# ###										### #
+# ### Epics database for					### #
+# ### SCAN System							### #
+# ###										### #
+# ### author: D. Hampai - M. Montis			### #
+# ###										### #
+# ### Ref 1.0; 2025-12-04					### #
 #################################################
 #
 #
@@ -30,13 +30,13 @@ record(stringin, $(user):experiment) {
 	field(PINI, "YES")
 }
 record(ai, "$(user):total_points") {
-        field(DESC, "Total Number Steps")
-        field(VAL, "0")
-        field(PINI, "YES")
+	field(DESC, "Total Number Steps")
+	field(VAL, "0")
+	field(PINI, "YES")
 }
 record(ai, "$(user):current_point") {
-        field(DESC, "General Step Iteration")
-        field(VAL, "0")
+	field(DESC, "General Step Iteration")
+	field(VAL, "0")
 	field(PINI, "YES")
 }
 record(ai, "$(user):scan_progress") {
@@ -50,23 +50,23 @@ record(ai, "$(user):scan_progress") {
 }
 record(ai, "$(user):scan_busy") {
 	field(DESC, "Scan busy")
-	field(VAL, "0")
+	field(VAL, "1")
 	field(PINI, "YES")
 }
 record(ao, "$(user):scan_pause") {
-        field(DESC, "Scan in Pause")
-        field(VAL, "0")
-        field(PINI, "YES")
+	field(DESC, "Scan in Pause")
+	field(VAL, "0")
+	field(PINI, "YES")
 }
 record(ao, "$(user):scan_restart") {
-        field(DESC, "Restart Scan")
-        field(VAL, "0")
-        field(PINI, "YES")
+	field(DESC, "Restart Scan")
+	field(VAL, "0")
+	field(PINI, "YES")
 }
 record(ao, "$(user):scan_abort") {
-        field(DESC, "Abort Scan")
-        field(VAL, "0")
-        field(PINI, "YES")
+	field(DESC, "Abort Scan")
+	field(VAL, "0")
+	field(PINI, "YES")
 }
 #####
 #	Save Path 
@@ -88,6 +88,11 @@ record(subArray, $(user):filename) {
 	field(FTVL, "STRING")
 	field(PREC, "3")
 }
+record(stringout, $(user):scan_file) {
+	field(DESC, "File with summary sets")
+	field(VAL, "test.dat")
+	field(PINI, "YES")
+}
 #####
 #       Scan Parameters
 #####
@@ -107,78 +112,86 @@ record(dfanout, $(user):motorindex) {
 	field(OUTD, "$(user):motor.NELM")
 }
 record(ao, $(user):num_detector) {
-        field(DESC, "Number of Detectors")
-        field(VAL, "1")
-        field(PINI, "YES")
-        field(OUT, "$(user):detectorindex")
-        field(FLNK, "$(user):detectorindex")
+	field(DESC, "Number of Detectors")
+	field(VAL, "1")
+	field(PINI, "YES")
+	field(OUT, "$(user):detectorindex")
+	field(FLNK, "$(user):detectorindex")
 }
 record(dfanout, $(user):detectorindex) {
-        field(SELM, "0")
-        field(SELL, "$(user):num_detector")
-        field(OUTA, "$(user):detector.NELM")
+	field(SELM, "0")
+	field(SELL, "$(user):num_detector")
+	field(OUTA, "$(user):detector.NELM")
+	field(OUTB, "$(user):filename.NELM")
 }
 #
 #
 #
 record(subArray, $(user):start) {
-        field(DESC, "Start point scanning")
+	field(DESC, "Start point scanning")
 	field(NELM, "20")
 	field(MALM, "20")
 	field(INDX, "0")
-        field(FTVL, "DOUBLE")
-        field(PREC, "3")
+	field(FTVL, "DOUBLE")
+	field(PREC, "3")
 }
 record(subArray, $(user):end) {
-        field(DESC, "End point scanning")
-        field(NELM, "20")
-        field(MALM, "20")
-        field(INDX, "0")
-        field(FTVL, "DOUBLE")
-        field(PREC, "3")
+	field(DESC, "End point scanning")
+	field(NELM, "20")
+	field(MALM, "20")
+	field(INDX, "0")
+	field(FTVL, "DOUBLE")
+	field(PREC, "3")
 }
 record(subArray, $(user):step) {
-        field(DESC, "Step scanning")
-        field(NELM, "20")
-        field(MALM, "20")
-        field(INDX, "0")
-        field(FTVL, "DOUBLE")
-        field(PREC, "3")
+	field(DESC, "Step scanning")
+	field(NELM, "20")
+	field(MALM, "20")
+	field(INDX, "0")
+	field(FTVL, "DOUBLE")
+	field(PREC, "3")
+}
+record(subArray, $(user):num_steps) {
+	field(DESC, "Number Steps per axis")
+	field(NELM, "20")
+	field(MALM, "20")
+	field(INDX, "0")
+	field(FTVL, "SHORT")
 }
 #####
 #	Definition Motor
 #####
 record(subArray, $(user):motor) {
-        field(DESC, "Name IOC motors")
-        field(NELM, "20")
-        field(MALM, "20")
-        field(INDX, "0")
-        field(FTVL, "STRING")
-        field(PREC, "3")
+	field(DESC, "Name IOC motors")
+	field(NELM, "20")
+	field(MALM, "20")
+	field(INDX, "0")
+	field(FTVL, "STRING")
+	field(PREC, "3")
 }
 #	List Motor Commands
 record(waveform, $(user):motor_command) {
-        field(DESC, "List Motor Command")
-        field(NELM, "7")
-        field(FTVL, "STRING")
+	field(DESC, "List Motor Command")
+	field(NELM, "7")
+	field(FTVL, "STRING")
 	field(INP, [setmr,setma,reqmoving,moving,reqpos,pos,busy])
 }
 #####
 #	Definition Detector
 #####
 record(subArray, $(user):detector) {
-        field(NELM, "20")
-        field(MALM, "20")
-        field(INDX, "0")
-        field(FTVL, "STRING")
-        field(PREC, "3")
+	field(NELM, "20")
+	field(MALM, "20")
+	field(INDX, "0")
+	field(FTVL, "STRING")
+	field(PREC, "3")
 }
 #	List Detector Commands
 record(waveform, $(user):detector_command) {
-        field(DESC, "List Detector Command")
-        field(NELM, "8")
-        field(FTVL, "STRING")
-        field(INP, [reqstart,reqdata,data,reqready,ready,type,busy,dataout])
+	field(DESC, "List Detector Command")
+	field(NELM, "8")
+	field(FTVL, "STRING")
+	field(INP, [reqstart,reqdata,data,reqready,ready,type,busy,dataout])
 }
 #####
 #	Out for Control
