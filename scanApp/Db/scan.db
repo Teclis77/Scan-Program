@@ -76,6 +76,11 @@ record(stringout, $(user):scan:filepath) {
 	field(VAL, "temp/data")
 	field(PINI, "YES")
 }
+record(stringout, $(user):scan:session) {
+	field(DESC, "session folder")
+	field(VAL, "test_folder")
+	field(PINI, "YES")
+}
 record(stringout, $(user):server:name) {
 	field(DESC, "Name Server")
 	field(VAL, "$(server)")
@@ -174,7 +179,8 @@ record(waveform, $(user):motor_command) {
 	field(DESC, "List Motor Command")
 	field(NELM, "7")
 	field(FTVL, "STRING")
-	field(INP, [setmr,setma,reqmoving,moving,reqpos,pos,busy])
+	field(INP, [setmr,setma,ask_request,moving,reqpos,pos,busy])
+#	field(INP, [setmr,setma,reqmoving,moving,reqpos,pos,busy])
 }
 #####
 #	Definition Detector
@@ -189,9 +195,10 @@ record(subArray, $(user):detector) {
 #	List Detector Commands
 record(waveform, $(user):detector_command) {
 	field(DESC, "List Detector Command")
-	field(NELM, "8")
+	field(NELM, "9")
 	field(FTVL, "STRING")
-	field(INP, [reqstart,reqdata,data,reqready,ready,type,busy,dataout])
+#	field(INP, [reqstart,reqdata,data,reqready,ready,type,busy,dataout])
+	field(INP, [reqstart,reqdata,data,reqready,ready,type,busy,dataout,filepath])
 }
 #####
 #	Out for Control
